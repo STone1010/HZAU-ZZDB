@@ -1,0 +1,91 @@
+Microsoft (R) Macro Assembler Version 6.11		    06/11/24 21:05:54
+test12.asm						     Page 1 - 1
+
+
+				assume cs:code
+
+ 0000				code segment
+ 0000				start:
+				;保存中断程序 
+ 0000  8C C8			mov ax,cs
+ 0002  8E D8			mov ds,ax
+ 0004  BE 0038 R		mov si,offset do0
+ 0007  B8 0000			mov ax,0
+ 000A  8E C0			mov es,ax
+ 000C  BF 0200			mov di,200h
+ 000F  B9 0035			mov cx,offset do0end-offset do0
+ 0012  FC			cld
+ 0013  F3/ A4			rep movsb
+
+				;设置中断向量表
+ 0015  B8 0000			mov ax,0
+ 0018  8E C0			mov es,ax
+ 001A  26: C7 06 0000		mov word ptr es:[0*4],200h
+       0200
+ 0021  26: C7 06 0002		mov word ptr es:[0*4+2],0
+       0000
+ 0028  E8 0005			call divide_overflow
+
+				;触发除法错误
+ 002B  B8 4C00			mov ax,4c00h
+ 002E  CD 21			int 21h
+
+ 0030				divide_overflow:
+ 0030  B8 FFFF				mov ax,0ffffh
+ 0033  B3 01				mov bl,1h
+ 0035  F6 F3				div bl
+ 0037  C3				ret
+
+ 0038				do0: 
+ 0038  EB 09			jmp short do0start
+ 003A  6F 76 65 72 66 6C	db"overflow!"
+       6F 77 21
+
+ 0043				do0start:
+ 0043  8C C8				mov ax,cs
+ 0045  8E D8				mov ds,ax
+ 0047  BE 0202				mov si,202h;设置ds:si指向字符串
+					
+ 004A  B8 B800				mov ax,0b800h
+ 004D  8E C0				mov es,ax
+ 004F  BF 07C8				mov di,12*160+36*2;设置es：di指向中间显存位置；
+					
+ 0052  B9 0009				mov cx,9
+ 0055  8A 04			  s:mov al,[si]
+					mov es:di,al
+test12.asm(48): error A2032: invalid use of register
+ 0057  46				inc si
+ 0058  83 C7 02				add di,2
+ 005B  E2 F8				loop s
+ 005D  B8 4C00			mov ax,4c00h
+ 0060  CD 21			int 21h
+
+ 006D  90			do0end:nop
+ 006E				code ends
+				end start	
+Microsoft (R) Macro Assembler Version 6.11		    06/11/24 21:05:54
+test12.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+code . . . . . . . . . . . . . .	16 Bit	 006E	  Para	  Private 
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+divide_overflow  . . . . . . . .	L Near	 0030	  code	
+do0end . . . . . . . . . . . . .	L Near	 006D	  code	
+do0start . . . . . . . . . . . .	L Near	 0043	  code	
+do0  . . . . . . . . . . . . . .	L Near	 0038	  code	
+start  . . . . . . . . . . . . .	L Near	 0000	  code	
+s  . . . . . . . . . . . . . . .	L Near	 0055	  code	
+
+	   0 Warnings
+	   1 Errors
